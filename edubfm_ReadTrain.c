@@ -25,20 +25,17 @@
 /*
  * Module: edubfm_ReadTrain.c
  *
- * Description : 
+ * Description :
  *  Read a train into the buffer.
  *
  * Exports:
  *  edubfm_ReadTrain()
  */
 
-
+#include "EduBfM_Internal.h"
 #include "EduBfM_common.h"
 #include "RDsM.h"
-#include "RM.h"                 /* YKL05MAR97 */
-#include "EduBfM_Internal.h"
-
-
+#include "RM.h" /* YKL05MAR97 */
 
 /*@================================
  * edubfm_ReadTrain()
@@ -51,7 +48,7 @@
  *  For ODYSSEUS/EduCOSMOS EduBfM, refer to the EduBfM project manual.)
  *
  *  Using the given parameters, trainId and type,  read a train from
- *  the disk  and load it into the given buffer.   If the error occurs 
+ *  the disk  and load it into the given buffer.   If the error occurs
  *  when RDsM_ReadTrain() is called, simply return it.  The function has
  *  no code for checking input parameters since this will be done RDsM,
  *  especially RDsM_ReadTrain().
@@ -64,19 +61,19 @@
  *  1) parameter aTrain
  *     a buffer specified by 'aTrain' is filled with a disk content
  */
-Four edubfm_ReadTrain(
-    TrainID *trainId,		/* IN which train? */
-    char    *aTrain,		/* OUT a pointer to buffer */
-    Four    type )		/* IN buffer type */
+Four edubfm_ReadTrain(TrainID *trainId, /* IN which train? */
+                      char *aTrain,     /* OUT a pointer to buffer */
+                      Four type)        /* IN buffer type */
 {
-    Four e;			/* for error */
+  Four e; /* for error */
 
+  /* Error check whether using not supported functionality by EduBfM */
+  if (RM_IS_ROLLBACK_REQUIRED()) ERR(eNOTSUPPORTED_EDUBFM);
 
-	/* Error check whether using not supported functionality by EduBfM */
-	if (RM_IS_ROLLBACK_REQUIRED()) ERR(eNOTSUPPORTED_EDUBFM);
+  e = RDsM_ReadTrain(trainId, aTrain, BI_BUFSIZE(type));
 
+  if (e < 0) ERR(e);
 
+  return (eNOERROR);
 
-    return( eNOERROR );
-
-}  /* edubfm_ReadTrain */
+} /* edubfm_ReadTrain */
