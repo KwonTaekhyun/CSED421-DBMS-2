@@ -13,7 +13,7 @@ Student id: 20180522
 
 ## High Level
 
-< Buffer manager API 구현 >
+### < Buffer manager API 구현 >
 
 1. EduBfM_GetTrain()
     Page/train을 bufferPool에 fix 하고, page/train이 저장된 buffer element에 대한 포인터를 반환함
@@ -55,7 +55,7 @@ Student id: 20180522
 
 ## Low Level
 
-< Buffer manager internal function 구현 >
+### < Buffer manager internal function 구현 >
 
 1. edubfm_ReadTrain()
     Page/train을 disk로부터 읽어와서 buffer element에 저장하고, 해당 buffer element에 대한 포인터를 반환함
@@ -107,7 +107,7 @@ Student id: 20180522
 
 # Mapping Between Implementation And the Design
 
-< Buffer manager API 구현 >
+### < Buffer manager API 구현 >
 
 1. EduBfM_GetTrain()
     Page/train을 bufferPool에 fix 하고, page/train이 저장된 buffer element에 대한 포인터를 반환함
@@ -146,7 +146,7 @@ Student id: 20180522
     1. 각 bufTable의 모든 element들을 초기화함
     2. 각 hashTable에 저장된 모든 entry (즉, array index) 들을 삭제함
 
-< Buffer manager internal function 구현 >
+### < Buffer manager internal function 구현 >
 
 1. edubfm_ReadTrain()
     Page/train을 disk로부터 읽어와서 buffer element에 저장하고, 해당 buffer element에 대한 포인터를 반환함
