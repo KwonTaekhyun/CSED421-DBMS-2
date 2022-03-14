@@ -66,9 +66,25 @@ Four edubfm_FlushTrain(TrainID *trainId, /* IN train to be flushed */
   /* Error check whether using not supported functionality by EduBfM */
   if (RM_IS_ROLLBACK_REQUIRED()) ERR(eNOTSUPPORTED_EDUBFM);
 
-  e = RDsM_WriteTrain(BI_BUFFER(type, index), trainId, BI_BUFSIZE(type));
-  if (e < 0) ERR(e);
+  // 1. Flush 할 page/train의 hash key value를 이용하여, 해당 page/train이
+  // 저장된 buffer element의 array index를 hashTable에서 검색함
+  index = edubfm_LookUp(trainId, type);
 
-  return (eNOERROR);
+  if (index != eBADHASHKEY_BFM) {
+    // 2. 해당 buffer element에 대한 DIRTY bit가 1로 set 된 경우, 해당
+    // page/train을 disk에 기록함
+    if ((BI_BITS(type, index) & DIRTY) == 1) {
+      e = RDsM_WriteTrain(BI_BUFFER(type, index), trainId, BI_BUFSIZE(type));
+      if (e < 0) ERR(e);
 
+      // 3. 해당 DIRTY bit를 unset 함
+      BI_BITS(type, index) &= ~DIRTY;
+
+      return e;
+    } else {
+      return (eNOERROR);
+    }
+  } else {
+    return eBADHASHKEY_BFM;
+  }
 } /* edubfm_FlushTrain */

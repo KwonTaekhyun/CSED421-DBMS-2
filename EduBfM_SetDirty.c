@@ -25,9 +25,9 @@
 /*
  * Module: EduBfM_SetDirty.c
  *
- * Description: 
+ * Description:
  *  Set the dirty bit of an entry in the buffer table.
- * 
+ *
  * Exports:
  *  Four EduBfM_SetDirty(TrainID*, Four)
  *
@@ -35,11 +35,8 @@
  *  This function should be called if the user modify the buffer.
  */
 
-
-#include "EduBfM_common.h"
 #include "EduBfM_Internal.h"
-
-
+#include "EduBfM_common.h"
 
 /*@================================
  * EduBfM_SetDirty()
@@ -47,31 +44,35 @@
 /*
  * Function: Four EduBfM_SetDirty(TrainID*, Four)
  *
- * Description: 
+ * Description:
  * (Following description is for original ODYSSEUS/COSMOS BfM.
  *  For ODYSSEUS/EduCOSMOS EduBfM, refer to the EduBfM project manual.)
  *
  *  Set the dirty bit of an entry in the buffer table.
  *  Look up the entry in the using given parameters and set the dirty
  *  bit of the entry.
- * 
+ *
  * Returns:
  *  error code
  *    eBADBUFFERTYPE_BFM - bad buffer type
  *    some errors caused by function calls
  */
 Four EduBfM_SetDirty(
-    TrainID             *trainId,               /* IN which train has been modified in the buffer?  */
-    Four                type )                  /* IN buffer type */
+    TrainID *trainId, /* IN which train has been modified in the buffer?  */
+    Four type)        /* IN buffer type */
 {
-    Four                index;                  /* an index of the buffer table & pool */
+  Four index; /* an index of the buffer table & pool */
 
+  /*@ Is the paramter valid? */
+  if (IS_BAD_BUFFERTYPE(type)) ERR(eBADBUFFERTYPE_BFM);
 
-    /*@ Is the paramter valid? */
-    if (IS_BAD_BUFFERTYPE(type)) ERR(eBADBUFFERTYPE_BFM);
+  // 1. 수정된 page/train의 hash key value를 이용하여, 해당 해당 page/train이
+  // 저장된 buffer element의 array index를 hashTable에서 검색함
+  index = edubfm_LookUp(trainId, type);
 
+  // 2. 해당 buffer element에 대한 DIRTY bit를 1로 set함
+  BI_BITS(type, index) |= 0x1;
 
+  return (eNOERROR);
 
-    return( eNOERROR );
-
-}  /* EduBfM_SetDirty */
+} /* EduBfM_SetDirty */

@@ -1,3 +1,10 @@
 {
-    "editor.defaultFormatter": "ms-vscode.cpptools"
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/DBMS/DBMS-Project-2",
+            "binaryPath": "/DBMS/DBMS-Project-2/EduBfM_Test",
+            "binaryArgs": ["-a"]
+        }
+    ]
 }

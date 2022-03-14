@@ -1,0 +1,5 @@
+make EduBfM_Test --dry-run --keep-going --print-directory
+make: Entering directory '/DBMS/DBMS-Project-2'
+make: 'EduBfM_Test' is up to date.
+make: Leaving directory '/DBMS/DBMS-Project-2'
+ 

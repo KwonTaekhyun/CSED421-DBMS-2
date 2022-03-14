@@ -25,6 +25,8 @@
 #ifndef _EDUBFM_H_
 #define _EDUBFM_H_
 
+#include "EduBfM_basictypes.h"
+#include "EduBfM_common.h"
 
 /*@
  * Function Prototypes
@@ -35,6 +37,5 @@ Four EduBfM_GetTrain(TrainID *, char **, Four);
 Four EduBfM_SetDirty(TrainID *, Four);
 Four EduBfM_DiscardAll(void);
 Four EduBfM_FlushAll(void);
-
 
 #endif /* _EDUBFM_H_ */

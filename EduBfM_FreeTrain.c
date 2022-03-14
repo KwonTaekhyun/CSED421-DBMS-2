@@ -32,11 +32,8 @@
  *  Four EduBfM_FreeTrain(TrainID *, Four)
  */
 
-
-#include "EduBfM_common.h"
 #include "EduBfM_Internal.h"
-
-
+#include "EduBfM_common.h"
 
 /*@================================
  * EduBfM_FreeTrain()
@@ -56,18 +53,34 @@
  *    eBADBUFFERTYPE_BFM - bad buffer type
  *    some errors caused by fuction calls
  */
-Four EduBfM_FreeTrain( 
-    TrainID             *trainId,       /* IN train to be freed */
-    Four                type)           /* IN buffer type */
+Four EduBfM_FreeTrain(TrainID *trainId, /* IN train to be freed */
+                      Four type)        /* IN buffer type */
 {
-    Four                index;          /* index on buffer holding the train */
-    Four 		e;		/* error code */
+  Four index; /* index on buffer holding the train */
+  Four e;     /* error code */
 
-    /*@ check if the parameter is valid. */
-    if (IS_BAD_BUFFERTYPE(type)) ERR(eBADBUFFERTYPE_BFM);	
+  /*@ check if the parameter is valid. */
+  if (IS_BAD_BUFFERTYPE(type)) {
+    ERR(eBADBUFFERTYPE_BFM);
+    return eBADBUFFERTYPE_BFM;
+  }
+  // 1. Unfix 할 page/train의 hash key value를 이용하여, 해당 page/train이
+  // 저장된 buffer element의 array index를 hashTable에서 검색함
+  index = edubfm_LookUp(trainId, type);
 
+  if (index == NOTFOUND_IN_HTABLE) {
+    return NOTFOUND_IN_HTABLE;
+  }
 
-    
-    return( eNOERROR );
-    
+  // 2. 해당 buffer element에 대한 fixed 변수 값을 1 감소시킴
+  // fixed 변수의 값은 0 미만이 될 수 없음
+  if (BI_FIXED(type, index) == 0) {
+    printf("fixed counter is less than 0!!!\n");
+    printf("trainId = {%d, %d}\n", trainId->volNo, trainId->pageNo);
+  } else {
+    --(BI_FIXED(type, index));
+  }
+
+  return (eNOERROR);
+
 } /* EduBfM_FreeTrain() */

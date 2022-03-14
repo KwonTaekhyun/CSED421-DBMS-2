@@ -39,16 +39,14 @@
  *  Four edubfm_DeleteAll(void)
  */
 
-
 #include <stdlib.h> /* for malloc & free */
-#include "EduBfM_common.h"
+
 #include "EduBfM_Internal.h"
-
-
+#include "EduBfM_common.h"
 
 /*@
  * macro definitions
- */  
+ */
 
 /* Macro: BFM_HASH(k,type)
  * Description: return the hash value of the key given as a parameter
@@ -57,8 +55,7 @@
  *  Four type       : buffer type
  * Returns: (Two) hash value
  */
-#define BFM_HASH(k,type)	(((k)->volNo + (k)->pageNo) % HASHTABLESIZE(type))
-
+#define BFM_HASH(k, type) (((k)->volNo + (k)->pageNo) % HASHTABLESIZE(type))
 
 /*@================================
  * edubfm_Insert()
@@ -77,27 +74,41 @@
  *  error code
  *    eBADBUFINDEX_BFM - bad index value for buffer table
  */
-Four edubfm_Insert(
-    BfMHashKey 		*key,			/* IN a hash key in Buffer Manager */
-    Two 		index,			/* IN an index used in the buffer pool */
-    Four 		type)			/* IN buffer type */
+Four edubfm_Insert(BfMHashKey *key, /* IN a hash key in Buffer Manager */
+                   Two index,       /* IN an index used in the buffer pool */
+                   Four type)       /* IN buffer type */
 {
-    Four 		i;			
-    Two  		hashValue;
+  Four i;
+  Two hashValue;
 
+  CHECKKEY(key); /*@ check validity of key */
 
-    CHECKKEY(key);    /*@ check validity of key */
+  if ((index < 0) || (index > BI_NBUFS(type))) {
+    ERR(eBADBUFINDEX_BFM);
+    return eBADBUFINDEX_BFM;
+  }
 
-    if( (index < 0) || (index > BI_NBUFS(type)) )
-        ERR( eBADBUFINDEX_BFM );
+  // 1. 해당 buffer element에 저장된 page/train의 hash key value를 이용하여,
+  // hashTable에서 해당 array index를 삽입할 위치를 결정함
+  hashValue = BFM_HASH(key, type);
+  Two hashEntry = BI_HASHTABLEENTRY(type, hashValue);
 
-   
+  if (hashEntry == -1) {
+    // 2. Collision이 발생하지 않은 경우, 해당 array index를 결정된 위치에
+    // 삽입함
+    BI_HASHTABLEENTRY(type, hashValue) = index;
+  } else {
+    // 3. Collision이 발생한 경우, chaining 방법을 사용하여 이를 처리함
+    // 1) 해당 buffer element에 대한 nextHashEntry 변수에 기존 hashTable entry
+    // (array index) 를 저장함
+    BI_NEXTHASHENTRY(type, index) = hashEntry;
 
-    return( eNOERROR );
+    // 2) 새로운 array index를 결정된 위치에 삽입함
+    BI_HASHTABLEENTRY(type, hashValue) = index;
+  }
 
-}  /* edubfm_Insert */
-
-
+  return (eNOERROR);
+} /* edubfm_Insert */
 
 /*@================================
  * edubfm_Delete()
@@ -116,23 +127,34 @@ Four edubfm_Insert(
  *  error code
  *    eNOTFOUND_BFM - The key isn't in the hash table.
  */
-Four edubfm_Delete(
-    BfMHashKey          *key,                   /* IN a hash key in buffer manager */
-    Four                type )                  /* IN buffer type */
+Four edubfm_Delete(BfMHashKey *key, /* IN a hash key in buffer manager */
+                   Four type)       /* IN buffer type */
 {
-    Two                 i, prev;                
-    Two                 hashValue;
+  Two i, prev;
+  Two hashValue;
 
+  CHECKKEY(key); /*@ check validity of key */
 
-    CHECKKEY(key);    /*@ check validity of key */
+  // 1. 해당 buffer element에 저장된 page/train의 hash key value를 이용하여,
+  // 삭제할 buffer element의 array index를 hashTable에서 검색함
+  i = edubfm_LookUp(key, type);
 
+  if (i != -1) {
+    // 2. 검색된 entry (array index) 를 hashTable에서 삭제함
+    // 동일한 hash key value를 갖는 page/train들이 저장된 buffer element들의
+    // array index들간의 linked list 구조가 유지되도록 해당 array index를 삭제함
 
+    Two prev = BI_NEXTHASHENTRY(type, i);
+    hashValue = BFM_HASH(key, type);
+    BI_HASHTABLEENTRY(type, hashValue) = prev;
 
-    ERR( eNOTFOUND_BFM );
+    return (eNOERROR);
+  } else {
+    ERR(eNOTFOUND_BFM);
+    return eNOTFOUND_BFM;
+  }
 
-}  /* edubfm_Delete */
-
-
+} /* edubfm_Delete */
 
 /*@================================
  * edubfm_LookUp()
@@ -151,23 +173,33 @@ Four edubfm_Delete(
  *  index on buffer table entry holding the train specified by 'key'
  *  (NOTFOUND_IN_HTABLE - The key don't exist in the hash table.)
  */
-Four edubfm_LookUp(
-    BfMHashKey          *key,                   /* IN a hash key in Buffer Manager */
-    Four                type)                   /* IN buffer type */
+Four edubfm_LookUp(BfMHashKey *key, /* IN a hash key in Buffer Manager */
+                   Four type)       /* IN buffer type */
 {
-    Two                 i, j;                   /* indices */
-    Two                 hashValue;
+  Two i, j; /* indices */
+  Two hashValue;
 
+  CHECKKEY(key); /*@ check validity of key */
 
-    CHECKKEY(key);    /*@ check validity of key */
+  // 1. 현재 page/train의 hash key value 구하기
+  hashValue = BFM_HASH(key, type);
 
+  // 2. hashTableEntry에 해당하는 buffer element idx 구하기 (후보)
+  i = BI_HASHTABLEENTRY(type, hashValue);
 
+  // 3. 정확히 pageNo와 volNo가 일치하는 page/train을 찾는다
+  while (i != NOTFOUND_IN_HTABLE) {
+    BfMHashKey *key2 = &BI_KEY(type, i);
 
-    return(NOTFOUND_IN_HTABLE);
-    
-}  /* edubfm_LookUp */
+    if (EQUALKEY(key, key2)) {
+      break;
+    } else {
+      i = BI_NEXTHASHENTRY(type, i);
+    }
+  }
 
-
+  return i;
+} /* edubfm_LookUp */
 
 /*@================================
  * edubfm_DeleteAll()
@@ -184,13 +216,22 @@ Four edubfm_LookUp(
  * Returns:
  *  error code
  */
-Four edubfm_DeleteAll(void)
-{
-    Two 	i;
-    Four        tableSize;
-    
+Four edubfm_DeleteAll(void) {
+  Two i;
+  Two tableSize;
+  Four type;
 
+  type = PAGE_BUF;
+  tableSize = HASHTABLESIZE(type);
+  for (int i = 0; i < tableSize; ++i) {
+    BI_HASHTABLEENTRY(type, i) = -1;
+  }
+  type = LOT_LEAF_BUF;
+  tableSize = HASHTABLESIZE(type);
+  for (int i = 0; i < tableSize; ++i) {
+    BI_HASHTABLEENTRY(type, i) = -1;
+  }
 
-    return(eNOERROR);
+  return (eNOERROR);
 
-} /* edubfm_DeleteAll() */ 
+} /* edubfm_DeleteAll() */

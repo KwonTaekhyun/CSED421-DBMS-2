@@ -72,8 +72,11 @@ Four edubfm_ReadTrain(TrainID *trainId, /* IN which train? */
 
   e = RDsM_ReadTrain(trainId, aTrain, BI_BUFSIZE(type));
 
-  if (e < 0) ERR(e);
-
-  return (eNOERROR);
+  if (e < 0) {
+    ERR(e);
+    return e;
+  } else {
+    return (eNOERROR);
+  }
 
 } /* edubfm_ReadTrain */
