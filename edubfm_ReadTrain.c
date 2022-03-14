@@ -67,6 +67,9 @@ Four edubfm_ReadTrain(TrainID *trainId, /* IN which train? */
 {
   Four e; /* for error */
 
+  // Page/train을 disk로부터 읽어와서 buffer element에 저장하고, 해당 buffer
+  // element에 대한 포인터를 반환함
+
   /* Error check whether using not supported functionality by EduBfM */
   if (RM_IS_ROLLBACK_REQUIRED()) ERR(eNOTSUPPORTED_EDUBFM);
 

@@ -56,6 +56,11 @@ Four EduBfM_FlushAll(void) {
   Two i;     /* index */
   Four type; /* buffer type */
 
+  // 각 bufferPool에 존재하는 page/train들 중 수정된 page/train들을 disk에
+  // 기록함
+
+  // 1. DIRTY bit가 1로 set 된 buffer element들에 저장된 각 page/train에 대해,
+  // edubfm_FlushTrain()을 호출하여 해당 page/train을 disk에 기록함
   type = PAGE_BUF;
   for (i = 0; i < BI_NBUFS(type); ++i) {
     if ((BI_BITS(type, i) & DIRTY) != 0) {

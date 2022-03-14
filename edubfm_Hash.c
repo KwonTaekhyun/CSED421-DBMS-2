@@ -221,6 +221,8 @@ Four edubfm_DeleteAll(void) {
   Two tableSize;
   Four type;
 
+  // 각 hashTable에서 모든 entry (buffer element의 array index) 들을 삭제함
+
   type = PAGE_BUF;
   tableSize = HASHTABLESIZE(type);
   for (int i = 0; i < tableSize; ++i) {
