@@ -19,13 +19,13 @@ Student id: 20180522
     Page/train을 bufferPool에 fix 하고, page/train이 저장된 buffer element에 대한 포인터를 반환함
     
     1. Fix 할 page/train의 hash key value를 이용하여, 해당 page/train이 저장된 buffer element의 array index를 hashTable에서 검색함
-    2-1. Fix 할 page/train이 bufferPool에 존재하지 않는 경우,
+    2. Fix 할 page/train이 bufferPool에 존재하지 않는 경우,
         1) bufferPool에서 page/train을 저장할 buffer element 한 개를 할당 받음
         2) Page/train을 disk로부터 읽어와서 할당 받은 buffer element에 저장함
         3) 할당 받은 buffer element에 대응하는 bufTable element를 갱신함
         4) 할당 받은 buffer element의 array index를 hashTable에 삽입함
         5) 할당 받은 buffer element에 대한 포인터를 반환함
-    2-2. Fix 할 page/train이 bufferPool에 존재하는 경우,
+    3. Fix 할 page/train이 bufferPool에 존재하는 경우,
         1) 해당 page/train이 저장된 buffer element에 대응하는 bufTable element를 갱신함
         2) 해당 buffer element에 대한 포인터를 반환함
 
@@ -77,8 +77,8 @@ Student id: 20180522
 
     1. 해당 buffer element에 저장된 page/train의 hash key value를 이용하여, hashTable에서 해당 array index를 삽입할 위치를 결정함
         1) Hash key value가 n 인 경우, hashTable의 n 번째 entry에 삽입함
-    2-1. Collision이 발생하지 않은 경우, 해당 array index를 결정된 위치에 삽입함
-    2-2. Collision이 발생한 경우, chaining 방법을 사용하여 이를 처리함
+    2. Collision이 발생하지 않은 경우, 해당 array index를 결정된 위치에 삽입함
+    3. Collision이 발생한 경우, chaining 방법을 사용하여 이를 처리함
         1) 해당 buffer element에 대한 nextHashEntry 변수에 기존 hashTable entry (array index) 를 저장함
         2) 새로운 array index를 결정된 위치에 삽입함 (동일한 hash key value를 갖는 page/train들이 저장된 buffer element들의 array index들이 linked list 형태로 연결되어 유지됨)
 
@@ -113,13 +113,13 @@ Student id: 20180522
     Page/train을 bufferPool에 fix 하고, page/train이 저장된 buffer element에 대한 포인터를 반환함
     
     1. Fix 할 page/train의 hash key value를 이용하여, 해당 page/train이 저장된 buffer element의 array index를 hashTable에서 검색함
-    2-1. Fix 할 page/train이 bufferPool에 존재하지 않는 경우,
+    2. Fix 할 page/train이 bufferPool에 존재하지 않는 경우,
         1) bufferPool에서 page/train을 저장할 buffer element 한 개를 할당 받음
         2) Page/train을 disk로부터 읽어와서 할당 받은 buffer element에 저장함
         3) 할당 받은 buffer element에 대응하는 bufTable element를 갱신함
         4) 할당 받은 buffer element의 array index를 hashTable에 삽입함
         5) 할당 받은 buffer element에 대한 포인터를 반환함
-    2-2. Fix 할 page/train이 bufferPool에 존재하는 경우,
+    3. Fix 할 page/train이 bufferPool에 존재하는 경우,
         1) 해당 page/train이 저장된 buffer element에 대응하는 bufTable element를 갱신함
         2) 해당 buffer element에 대한 포인터를 반환함
 
@@ -168,8 +168,8 @@ Student id: 20180522
 
     1. 해당 buffer element에 저장된 page/train의 hash key value를 이용하여, hashTable에서 해당 array index를 삽입할 위치를 결정함
         1) Hash key value가 n 인 경우, hashTable의 n 번째 entry에 삽입함
-    2-1. Collision이 발생하지 않은 경우, 해당 array index를 결정된 위치에 삽입함
-    2-2. Collision이 발생한 경우, chaining 방법을 사용하여 이를 처리함
+    2. Collision이 발생하지 않은 경우, 해당 array index를 결정된 위치에 삽입함
+    3. Collision이 발생한 경우, chaining 방법을 사용하여 이를 처리함
         1) 해당 buffer element에 대한 nextHashEntry 변수에 기존 hashTable entry (array index) 를 저장함
         2) 새로운 array index를 결정된 위치에 삽입함 (동일한 hash key value를 갖는 page/train들이 저장된 buffer element들의 array index들이 linked list 형태로 연결되어 유지됨)
 
